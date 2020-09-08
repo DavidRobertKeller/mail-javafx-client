@@ -8,9 +8,12 @@ import java.nio.file.Path;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.Security;
+import java.util.List;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import davidkeller.sign.utils.CreateVisibleSignature2;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -29,7 +32,8 @@ public class MainApplication extends Application {
         stage.setScene(scene);
         stage.show();
         
-        testDownload();
+//        testDownload();
+        testGetDocumentMetadataList();
     }
 
     public static void main(String[] args) {
@@ -38,11 +42,30 @@ public class MainApplication extends Application {
 
     public void testDownload() {
     	MailDocumentWebClient client = new MailDocumentWebClient();
-    	String mailId = "5f56640362f5e00d54e5ebc3";
-    	String documentId = "5f56640862f5e00d54e5ebc4";
+    	String mailId = "5f5736aabbe86c714e0cef5c";
+    	String documentId = "5f5736b6bbe86c714e0cef5d";
     	final Path path = FileSystems.getDefault().getPath("C:\\data\\test\\cert\\document-" + System.currentTimeMillis() + ".pdf");
-    	client.consume(mailId, documentId, path);
+    	client.downloadDocument(mailId, documentId, path);
     }
+    
+    public void testGetDocumentMetadataList() {
+    	
+    	try {
+        	MailDocumentWebClient client = new MailDocumentWebClient();
+        	String mailId = "5f5736aabbe86c714e0cef5c";
+        	String s = client.getDocumentMetadataList(mailId);
+        	System.out.println("s = " + s);
+        
+        	ObjectMapper mapper = new ObjectMapper();
+//        	TypeReference<HashMap<String,Object>> typeRef = new TypeReference<HashMap<String,Object>>() {};
+        	TypeReference<List<Object>> typeRef = new TypeReference<List<Object>>() {};
+        	List<Object> o = mapper.readValue(s, typeRef); 
+			System.out.println("o= " + mapper.writerWithDefaultPrettyPrinter().writeValueAsString(o)); 
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+    }
+    
     
     public void testSign() {
         String passphrase = "pass";
